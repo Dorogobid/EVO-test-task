@@ -1,19 +1,19 @@
 # EVO-test-task
 
-Get PostgreSQL Docker image
+Build images
 
 ```
-make image
+docker-compose build
 ```
 
-Run Docker container
+Start app
 
 ```
-make postgres
+docker-compose up evo-test-app
 ```
 
-Run server
+Stop all
 
 ```
-make server
+docker-compose down
 ```

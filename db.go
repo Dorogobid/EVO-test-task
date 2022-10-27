@@ -9,7 +9,7 @@ import (
 )
 
 func connectToDb() *gorm.DB {
-	dsn := "host=localhost user=evo password=evo dbname=evo port=5432 sslmode=disable"
+	dsn := "host=postgres user=evo password=evo dbname=evo port=5432 sslmode=disable"
 	var db *gorm.DB
 	var err error
 	for {

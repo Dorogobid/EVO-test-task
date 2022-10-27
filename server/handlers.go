@@ -22,15 +22,12 @@ func uploadCSV(c echo.Context) error {
 
 	transactions := []*Transaction{}
 	if err := gocsv.Unmarshal(transactionsFile, &transactions); err != nil {
-		return err
+		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	//add db transactions
-	DB.Create(&transactions)
-
-	// for _, transaction := range transactions {
-	// 	fmt.Println(transaction.TransactionId, transaction.RequestId)
-	// }
+	if err := loadCSVToDB(transactions); err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
 
 	return c.HTML(http.StatusOK, fmt.Sprintf("<p>File %s uploaded successfully</p>", file.Filename))
 }

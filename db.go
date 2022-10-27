@@ -1,18 +1,32 @@
 package main
 
 import (
+	"fmt"
+	"time"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 func connectToDb() *gorm.DB {
 	dsn := "host=localhost user=evo password=evo dbname=evo port=5432 sslmode=disable"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic("Connection to database failed.")
+	var db *gorm.DB
+	var err error
+	for {
+		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		if err != nil {
+			fmt.Println("Connection to database failed. Trying to reconnect...")
+		} else {
+			fmt.Println("Connected to database done.")
+			break
+		}
+		time.Sleep(time.Second * 5)
 	}
 
-	db.AutoMigrate(&Transaction{})
+	err = db.AutoMigrate(&Transaction{})
+	if err != nil {
+		panic("Could not run migration.")
+	}
 	return db
 }
 

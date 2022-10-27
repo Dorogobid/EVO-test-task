@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// Upload CSV endpoint
 func uploadCSV(c echo.Context) error {
 	file, err := c.FormFile("file")
 	if err != nil {

@@ -30,13 +30,16 @@ func getFilteredData(s *SearchTransaction) []*Transaction {
 		if !isFirst {query += " and"}
 		query += " date_post>=@date_post_from and date_post<@date_post_to"
 		isFirst = false
-	} //date format
+	} 
 	if s.PaymentNarrative != "" {
 		if !isFirst {query += " and"}
 		query += " lower(payment_narrative) like lower(@payment_narrative)"
 		isFirst = false
 	}
 	
-	DB.Raw(query, sql.Named("transaction_id", s.TransactionId), sql.Named("status", s.Status), sql.Named("terminal_id", s.TerminalId), sql.Named("payment_type", s.PaymentType), sql.Named("date_post_from", s.DatePostFrom), sql.Named("date_post_to", s.DatePostTo), sql.Named("payment_narrative", "%"+s.PaymentNarrative+"%")).Find(&transactions)
+	DB.Raw(query, sql.Named("transaction_id", s.TransactionId), sql.Named("status", s.Status), 
+		sql.Named("terminal_id", s.TerminalId), sql.Named("payment_type", s.PaymentType), 
+		sql.Named("date_post_from", s.DatePostFrom), sql.Named("date_post_to", s.DatePostTo), 
+		sql.Named("payment_narrative", "%"+s.PaymentNarrative+"%")).Find(&transactions)
 	return transactions
 }

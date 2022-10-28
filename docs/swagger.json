@@ -1,0 +1,426 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "User API documentation",
+        "contact": {},
+        "version": "1.0.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/search": {
+            "get": {
+                "description": "Search transactions in database (query params) and return in JSON",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Search"
+                ],
+                "summary": "Get transactions",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "TransactionId",
+                        "name": "transaction_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "description": "TerminalId array",
+                        "name": "terminal_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "PaymentType",
+                        "name": "payment_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "DatePostFrom in format 'YYYY-MM-DD'",
+                        "name": "date_post_from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "DatePostTo in format 'YYYY-MM-DD'",
+                        "name": "date_post_to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "PaymentNarrative substring",
+                        "name": "payment_narrative",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.Transaction"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/main.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Search transactions in database (JSON body) and return in JSON",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Search"
+                ],
+                "summary": "Get transactions",
+                "parameters": [
+                    {
+                        "description": "Request body example",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.SearchTransaction"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.Transaction"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/main.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/search-csv": {
+            "get": {
+                "description": "Search transactions in database (query params) and return CSV file",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Search-csv"
+                ],
+                "summary": "Get transactions to CSV file",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "TransactionId",
+                        "name": "transaction_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "description": "TerminalId array",
+                        "name": "terminal_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "PaymentType",
+                        "name": "payment_type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "DatePostFrom in format 'YYYY-MM-DD'",
+                        "name": "date_post_from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "DatePostTo in format 'YYYY-MM-DD'",
+                        "name": "date_post_to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "PaymentNarrative substring",
+                        "name": "payment_narrative",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CSV file",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/main.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Search transactions in database (JSON body) and return CSV file",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Search-csv"
+                ],
+                "summary": "Get transactions to CSV file",
+                "parameters": [
+                    {
+                        "description": "Request body example",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.SearchTransaction"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CSV file",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/main.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/upload": {
+            "post": {
+                "description": "Import transactions from CSV file to database",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "multipart/form-data"
+                ],
+                "tags": [
+                    "Upload"
+                ],
+                "summary": "Import Transactions From File",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "Choose CSV file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.SucsessResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/main.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "main.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Error message"
+                }
+            }
+        },
+        "main.SearchTransaction": {
+            "type": "object",
+            "properties": {
+                "date_post_from": {
+                    "type": "string",
+                    "example": "2022-08-17"
+                },
+                "date_post_to": {
+                    "type": "string",
+                    "example": ""
+                },
+                "payment_narrative": {
+                    "type": "string",
+                    "example": ""
+                },
+                "payment_type": {
+                    "type": "string",
+                    "example": ""
+                },
+                "status": {
+                    "type": "string",
+                    "example": "accepted"
+                },
+                "terminal_id": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    },
+                    "example": [
+                        3509,
+                        3510
+                    ]
+                },
+                "transaction_id": {
+                    "type": "integer",
+                    "example": 0
+                }
+            }
+        },
+        "main.SucsessResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Sucsess message"
+                }
+            }
+        },
+        "main.Transaction": {
+            "type": "object",
+            "properties": {
+                "amount_original": {
+                    "type": "number",
+                    "example": 1899
+                },
+                "amount_total": {
+                    "type": "number",
+                    "example": 1899
+                },
+                "commission_client": {
+                    "type": "number",
+                    "example": 0
+                },
+                "commission_provider": {
+                    "type": "number",
+                    "example": -3.8
+                },
+                "commission_ps": {
+                    "type": "number",
+                    "example": 1.33
+                },
+                "date_input": {
+                    "type": "string",
+                    "example": "2022-08-23T09:04:49Z"
+                },
+                "date_post": {
+                    "type": "string",
+                    "example": "2022-08-23T09:04:50Z"
+                },
+                "partner_object_id": {
+                    "type": "integer",
+                    "example": 1111
+                },
+                "payee_bank_account": {
+                    "type": "string",
+                    "example": "UA713949358919023"
+                },
+                "payee_bank_mfo": {
+                    "type": "integer",
+                    "example": 304801
+                },
+                "payee_id": {
+                    "type": "integer",
+                    "example": 19237155
+                },
+                "payee_name": {
+                    "type": "string",
+                    "example": "privat"
+                },
+                "payment_narrative": {
+                    "type": "string",
+                    "example": "Перерахування коштів згідно договору про надання послуг А11/27122 від 19.11.2020 р."
+                },
+                "payment_number": {
+                    "type": "string",
+                    "example": "PS16698705"
+                },
+                "payment_type": {
+                    "type": "string",
+                    "example": "cash"
+                },
+                "request_id": {
+                    "type": "integer",
+                    "example": 20020
+                },
+                "service": {
+                    "type": "string",
+                    "example": "Поповнення карток"
+                },
+                "service_id": {
+                    "type": "integer",
+                    "example": 14480
+                },
+                "status": {
+                    "type": "string",
+                    "example": "accepted"
+                },
+                "terminal_id": {
+                    "type": "integer",
+                    "example": 3506
+                },
+                "transaction_id": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        }
+    }
+}

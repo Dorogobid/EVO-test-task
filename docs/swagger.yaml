@@ -1,0 +1,291 @@
+basePath: /
+definitions:
+  main.ErrorResponse:
+    properties:
+      message:
+        example: Error message
+        type: string
+    type: object
+  main.SearchTransaction:
+    properties:
+      date_post_from:
+        example: "2022-08-17"
+        type: string
+      date_post_to:
+        example: ""
+        type: string
+      payment_narrative:
+        example: ""
+        type: string
+      payment_type:
+        example: ""
+        type: string
+      status:
+        example: accepted
+        type: string
+      terminal_id:
+        example:
+        - 3509
+        - 3510
+        items:
+          type: integer
+        type: array
+      transaction_id:
+        example: 0
+        type: integer
+    type: object
+  main.SucsessResponse:
+    properties:
+      message:
+        example: Sucsess message
+        type: string
+    type: object
+  main.Transaction:
+    properties:
+      amount_original:
+        example: 1899
+        type: number
+      amount_total:
+        example: 1899
+        type: number
+      commission_client:
+        example: 0
+        type: number
+      commission_provider:
+        example: -3.8
+        type: number
+      commission_ps:
+        example: 1.33
+        type: number
+      date_input:
+        example: "2022-08-23T09:04:49Z"
+        type: string
+      date_post:
+        example: "2022-08-23T09:04:50Z"
+        type: string
+      partner_object_id:
+        example: 1111
+        type: integer
+      payee_bank_account:
+        example: UA713949358919023
+        type: string
+      payee_bank_mfo:
+        example: 304801
+        type: integer
+      payee_id:
+        example: 19237155
+        type: integer
+      payee_name:
+        example: privat
+        type: string
+      payment_narrative:
+        example: Перерахування коштів згідно договору про надання послуг А11/27122
+          від 19.11.2020 р.
+        type: string
+      payment_number:
+        example: PS16698705
+        type: string
+      payment_type:
+        example: cash
+        type: string
+      request_id:
+        example: 20020
+        type: integer
+      service:
+        example: Поповнення карток
+        type: string
+      service_id:
+        example: 14480
+        type: integer
+      status:
+        example: accepted
+        type: string
+      terminal_id:
+        example: 3506
+        type: integer
+      transaction_id:
+        example: 1
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  title: User API documentation
+  version: 1.0.0
+paths:
+  /search:
+    get:
+      description: Search transactions in database (query params) and return in JSON
+      parameters:
+      - description: TransactionId
+        in: query
+        name: transaction_id
+        type: integer
+      - description: TerminalId array
+        in: query
+        items:
+          type: integer
+        name: terminal_id
+        type: array
+      - description: Status
+        in: query
+        name: status
+        type: string
+      - description: PaymentType
+        in: query
+        name: payment_type
+        type: string
+      - description: DatePostFrom in format 'YYYY-MM-DD'
+        in: query
+        name: date_post_from
+        type: string
+      - description: DatePostTo in format 'YYYY-MM-DD'
+        in: query
+        name: date_post_to
+        type: string
+      - description: PaymentNarrative substring
+        in: query
+        name: payment_narrative
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.Transaction'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      summary: Get transactions
+      tags:
+      - Search
+    post:
+      consumes:
+      - application/json
+      description: Search transactions in database (JSON body) and return in JSON
+      parameters:
+      - description: Request body example
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.SearchTransaction'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/main.Transaction'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      summary: Get transactions
+      tags:
+      - Search
+  /search-csv:
+    get:
+      description: Search transactions in database (query params) and return CSV file
+      parameters:
+      - description: TransactionId
+        in: query
+        name: transaction_id
+        type: integer
+      - description: TerminalId array
+        in: query
+        items:
+          type: integer
+        name: terminal_id
+        type: array
+      - description: Status
+        in: query
+        name: status
+        type: string
+      - description: PaymentType
+        in: query
+        name: payment_type
+        type: string
+      - description: DatePostFrom in format 'YYYY-MM-DD'
+        in: query
+        name: date_post_from
+        type: string
+      - description: DatePostTo in format 'YYYY-MM-DD'
+        in: query
+        name: date_post_to
+        type: string
+      - description: PaymentNarrative substring
+        in: query
+        name: payment_narrative
+        type: string
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: CSV file
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      summary: Get transactions to CSV file
+      tags:
+      - Search-csv
+    post:
+      consumes:
+      - application/json
+      description: Search transactions in database (JSON body) and return CSV file
+      parameters:
+      - description: Request body example
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.SearchTransaction'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: CSV file
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      summary: Get transactions to CSV file
+      tags:
+      - Search-csv
+  /upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Import transactions from CSV file to database
+      parameters:
+      - description: Choose CSV file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - multipart/form-data
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.SucsessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.ErrorResponse'
+      summary: Import Transactions From File
+      tags:
+      - Upload
+swagger: "2.0"

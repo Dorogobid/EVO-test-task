@@ -5,6 +5,5 @@ COPY ./ ./
 RUN apt-get update
 RUN apt-get -y install postgresql-client
 RUN go mod download && go mod verify
-RUN chmod +x wait-for-postgres.sh
 RUN go build -o main .
 CMD ["./main"]

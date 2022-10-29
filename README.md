@@ -2,19 +2,13 @@
 
 ### Build and start application
 
-Build images
+Build containers and start application
 
 ```
-docker-compose build
+docker-compose up
 ```
 
-Start app
-
-```
-docker-compose up evo-test-app
-```
-
-Stop all
+Stop and remove containers
 
 ```
 docker-compose down

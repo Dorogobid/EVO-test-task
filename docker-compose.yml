@@ -3,7 +3,7 @@ version: '3.9'
 services:
   evo-test-app:
     build: ./
-    command: ./wait-for-postgres.sh postgres ./main
+    command: ./main
     ports:
       - 8080:8080
     depends_on:

@@ -1,9 +1,5 @@
 package main
 
-import (
-	"time"
-)
-
 type ErrorResponse struct {
 	Message string `json:"message" example:"Error message"`
 }
@@ -12,12 +8,8 @@ type SucsessResponse struct {
 	Message string `json:"message" example:"Sucsess message"`
 }
 
-type DateTime struct {
-	time.Time
-}
-
 type Transaction struct {
-	TransactionId 		uint		`gorm:"primaryKey" json:"transaction_id" example:"1"`
+	TransactionId 		uint		`gorm:"primaryKey;type:serial" json:"transaction_id" example:"1"`
 	RequestId 			uint		`json:"request_id" example:"20020"`
 	TerminalId 			uint		`json:"terminal_id" example:"3506"`
 	PartnerObjectId 	uint		`json:"partner_object_id" example:"1111"`

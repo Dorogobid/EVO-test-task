@@ -110,7 +110,7 @@ definitions:
 host: localhost:8080
 info:
   contact: {}
-  title: User API documentation
+  title: EVO test application API
   version: 1.0.0
 paths:
   /search:

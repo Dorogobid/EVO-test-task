@@ -36,7 +36,7 @@ func uploadCSV(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, errResp)
 	}
 
-	if err := loadCSVToDB(transactions); err != nil {
+	if err := DB.loadCSVToDB(transactions); err != nil {
 		errResp := ErrorResponse{Message: err.Error()}
 		return c.JSON(http.StatusInternalServerError, errResp)
 	}
@@ -69,7 +69,7 @@ func searchQueryToJSON(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, errResp)
 	}
 
-	transactions, err := getFilteredData(s)
+	transactions, err := DB.getFilteredData(s)
 	if err != nil {
 		errResp := ErrorResponse{Message: err.Error()}
 		return c.JSON(http.StatusBadRequest, errResp)
@@ -97,7 +97,7 @@ func searchJSONToJSON(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, errResp)
 	}
 
-	transactions, err := getFilteredData(s)
+	transactions, err := DB.getFilteredData(s)
 	if err != nil {
 		errResp := ErrorResponse{Message: err.Error()}
 		return c.JSON(http.StatusBadRequest, errResp)
@@ -128,7 +128,7 @@ func searchQueryToCSV(c echo.Context) error {
 		errResp := ErrorResponse{Message: "Bad request"}
 		return c.JSON(http.StatusBadRequest, errResp)
 	}
-	transactions, err := getFilteredData(s)
+	transactions, err := DB.getFilteredData(s)
 	if err != nil {
 		errResp := ErrorResponse{Message: err.Error()}
 		return c.JSON(http.StatusBadRequest, errResp)
@@ -160,7 +160,7 @@ func searchJSONToCSV(c echo.Context) error {
 		errResp := ErrorResponse{Message: "Bad request"}
 		return c.JSON(http.StatusBadRequest, errResp)
 	}
-	transactions, err := getFilteredData(s)
+	transactions, err := DB.getFilteredData(s)
 	if err != nil {
 		errResp := ErrorResponse{Message: err.Error()}
 		return c.JSON(http.StatusBadRequest, errResp)
@@ -173,4 +173,17 @@ func searchJSONToCSV(c echo.Context) error {
 	}
 	
 	return c.Blob(http.StatusOK, "text/csv", []byte(csvContent))
+}
+
+func bindData(c echo.Context, s *SearchTransaction) error {
+	return echo.QueryParamsBinder(c).
+	Uint("transaction_id", &s.TransactionId).
+	BindWithDelimiter("terminal_id", &s.TerminalId, ",").
+	BindWithDelimiter("terminal_id[]", &s.TerminalId, ",").
+	String("status", &s.Status).
+	String("payment_type", &s.PaymentType).
+	String("date_post_from", &s.DatePostFrom).
+	String("date_post_to", &s.DatePostTo).
+	String("payment_narrative", &s.PaymentNarrative).
+	BindError()
 }

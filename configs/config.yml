@@ -1,0 +1,9 @@
+port: ':8080'
+
+db:
+  username: 'evo'
+  password: 'evo'
+  host: 'postgres'
+  port: '5432'
+  dbname: 'evo'
+  sslmode: 'disable'

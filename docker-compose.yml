@@ -10,6 +10,7 @@ services:
       - postgres
     environment:
       - POSTGRES_USER=evo
+      - DB_HOST=postgres
       - POSTGRES_PASSWORD=evo
 
   postgres:

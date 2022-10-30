@@ -20,7 +20,7 @@ type DBConfig struct {
 }
 
 type DBManagerInterface interface {
-	ConnectToDb(cfg DBConfig)
+	ConnectToDb(cfg *DBConfig)
 	LoadCSVToDB(transactions []*Transaction) error
 	GetFilteredData(s *SearchTransaction) ([]*Transaction, error)
 }
@@ -29,7 +29,7 @@ type DBManager struct {
 	db *gorm.DB
 }
 
-func (db *DBManager) ConnectToDb(cfg DBConfig) {
+func (db *DBManager) ConnectToDb(cfg *DBConfig) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s", cfg.Host, cfg.Username, cfg.Password, cfg.DBName, cfg.Port, cfg.SSLMode)
 	var err error
 	for {

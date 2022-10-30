@@ -3,7 +3,7 @@ port: ':8080'
 db:
   username: 'evo'
   password: 'evo'
-  host: 'postgres'
+  host: 'localhost'
   port: '5432'
   dbname: 'evo'
   sslmode: 'disable'

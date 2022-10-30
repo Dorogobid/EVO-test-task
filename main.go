@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	_ "github.com/Dorogobid/EVO-test-task/docs"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -19,14 +22,7 @@ func main() {
 	}
 
 	db := &DBManager{}
-	db.ConnectToDb(DBConfig{
-		Host:     viper.GetString("db.host"),
-		Username: viper.GetString("db.username"),
-		Password: viper.GetString("db.password"),
-		DBName:   viper.GetString("db.dbname"),
-		Port:     viper.GetString("db.port"),
-		SSLMode:  viper.GetString("db.sslmode"),
-	})
+	db.ConnectToDb(getConfig())
 
 	var h HandlerInterface = &Handler{db: db}
 
@@ -53,4 +49,20 @@ func initConfig() error {
 	viper.AddConfigPath("configs")
 	viper.SetConfigName("config")
 	return viper.ReadInConfig()
+}
+
+func getConfig() *DBConfig {
+	host, isHostPresent := os.LookupEnv("DB_HOST")
+	if !isHostPresent {
+		host = viper.GetString("db.host")
+	}
+	fmt.Println(host)
+	return &DBConfig{
+		Host:     host,
+		Username: viper.GetString("db.username"),
+		Password: viper.GetString("db.password"),
+		DBName:   viper.GetString("db.dbname"),
+		Port:     viper.GetString("db.port"),
+		SSLMode:  viper.GetString("db.sslmode"),
+	}
 }

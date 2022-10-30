@@ -12,16 +12,15 @@ import (
 // @version 1.0.0
 // @host localhost:8080
 // @BasePath /
-var DB *DBManager
 
 func main() {
-	DB = &DBManager{}
+	db := &DBManager{}
 
 	if err := initConfig(); err != nil {
 		panic("Error initializing configs")
 	}
 
-	DB.connectToDb(DBConfig{
+	db.ConnectToDb(DBConfig{
 		Host: viper.GetString("db.host"),
 		Username: viper.GetString("db.username"),
 		Password: viper.GetString("db.password"),
@@ -36,13 +35,15 @@ func main() {
 		Format: "method=${method}, uri=${uri}, status=${status}\n",}))
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
 
-	e.POST("/upload", uploadCSV)
+	h := &Handler{db: db}
 
-	e.GET("/search", searchQueryToJSON)
-	e.POST("/search", searchJSONToJSON)
+	e.POST("/upload", h.UploadCSV)
 
-	e.GET("/search-csv", searchQueryToCSV)
-	e.POST("/search-csv", searchJSONToCSV)
+	e.GET("/search", h.SearchQueryToJSON)
+	e.POST("/search", h.SearchJSONToJSON)
+
+	e.GET("/search-csv", h.SearchQueryToCSV)
+	e.POST("/search-csv", h.SearchJSONToCSV)
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	

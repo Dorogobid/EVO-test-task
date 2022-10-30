@@ -20,14 +20,14 @@ type DBConfig struct {
 }
 
 type DBManager struct {
-	DB *gorm.DB
+	db *gorm.DB
 }
 
-func (db *DBManager) connectToDb(cfg DBConfig) {
+func (db *DBManager) ConnectToDb(cfg DBConfig) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s", cfg.Host, cfg.Username, cfg.Password, cfg.DBName, cfg.Port, cfg.SSLMode)
 	var err error
 	for {
-		db.DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		db.db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 		if err != nil {
 			fmt.Println("Connection to database failed. Trying to reconnect...")
 		} else {
@@ -37,14 +37,14 @@ func (db *DBManager) connectToDb(cfg DBConfig) {
 		time.Sleep(time.Second * 5)
 	}
 
-	err = db.DB.AutoMigrate(&Transaction{})
+	err = db.db.AutoMigrate(&Transaction{})
 	if err != nil {
 		panic("Could not run migration.")
 	}
 }
 
-func (db *DBManager) loadCSVToDB(transactions []*Transaction) error {
-	tx := db.DB.Begin()
+func (db *DBManager) LoadCSVToDB(transactions []*Transaction) error {
+	tx := db.db.Begin()
 	defer func() {
 	  if r := recover(); r != nil {
 		tx.Rollback()
@@ -64,7 +64,7 @@ func (db *DBManager) loadCSVToDB(transactions []*Transaction) error {
 	return tx.Commit().Error
 }
 
-func (db *DBManager) getFilteredData(s *SearchTransaction) ([]*Transaction, error) {
+func (db *DBManager) GetFilteredData(s *SearchTransaction) ([]*Transaction, error) {
 	transactions := []*Transaction{}
 	query := "select * from transactions where"
 	var isFirst bool = true
@@ -108,7 +108,7 @@ func (db *DBManager) getFilteredData(s *SearchTransaction) ([]*Transaction, erro
 		return nil, errors.New("QUERY_PARAMS_IS_EMPTY")
 	}
 	
-	db.DB.Raw(query, sql.Named("transaction_id", s.TransactionId), sql.Named("status", s.Status), 
+	db.db.Raw(query, sql.Named("transaction_id", s.TransactionId), sql.Named("status", s.Status), 
 		sql.Named("terminal_id", s.TerminalId), sql.Named("payment_type", s.PaymentType), 
 		sql.Named("date_post_from", s.DatePostFrom), sql.Named("date_post_to", s.DatePostTo), 
 		sql.Named("payment_narrative", "%"+s.PaymentNarrative+"%")).Find(&transactions)

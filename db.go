@@ -11,12 +11,18 @@ import (
 )
 
 type DBConfig struct {
-	Host string
+	Host     string
 	Username string
 	Password string
-	DBName string
-	Port string
-	SSLMode string
+	DBName   string
+	Port     string
+	SSLMode  string
+}
+
+type DBManagerInterface interface {
+	ConnectToDb(cfg DBConfig)
+	LoadCSVToDB(transactions []*Transaction) error
+	GetFilteredData(s *SearchTransaction) ([]*Transaction, error)
 }
 
 type DBManager struct {
@@ -46,20 +52,20 @@ func (db *DBManager) ConnectToDb(cfg DBConfig) {
 func (db *DBManager) LoadCSVToDB(transactions []*Transaction) error {
 	tx := db.db.Begin()
 	defer func() {
-	  if r := recover(); r != nil {
-		tx.Rollback()
-	  }
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
 	}()
-  
+
 	if err := tx.Error; err != nil {
-	  return err
+		return err
 	}
-  
+
 	for _, transaction := range transactions {
 		if err := tx.Create(&transaction).Error; err != nil {
 			tx.Rollback()
 			return err
-		 }
+		}
 	}
 	return tx.Commit().Error
 }
@@ -74,32 +80,44 @@ func (db *DBManager) GetFilteredData(s *SearchTransaction) ([]*Transaction, erro
 		isFirst = false
 	}
 	if s.Status != "" {
-		if !isFirst {query += " and"}
+		if !isFirst {
+			query += " and"
+		}
 		query += " status=@status"
 		isFirst = false
 	}
-	if s.TerminalId != nil && len(s.TerminalId) != 0{
-		if !isFirst {query += " and"}
+	if s.TerminalId != nil && len(s.TerminalId) != 0 {
+		if !isFirst {
+			query += " and"
+		}
 		query += " terminal_id in @terminal_id"
 		isFirst = false
 	}
 	if s.PaymentType != "" {
-		if !isFirst {query += " and"}
+		if !isFirst {
+			query += " and"
+		}
 		query += " payment_type=@payment_type"
 		isFirst = false
 	}
 	if s.DatePostFrom != "" {
-		if !isFirst {query += " and"}
+		if !isFirst {
+			query += " and"
+		}
 		query += " date_post>=@date_post_from"
 		isFirst = false
-	} 
+	}
 	if s.DatePostTo != "" {
-		if !isFirst {query += " and"}
+		if !isFirst {
+			query += " and"
+		}
 		query += " date_post<@date_post_to"
 		isFirst = false
-	} 
+	}
 	if s.PaymentNarrative != "" {
-		if !isFirst {query += " and"}
+		if !isFirst {
+			query += " and"
+		}
 		query += " lower(payment_narrative) like lower(@payment_narrative)"
 		isFirst = false
 	}
@@ -107,10 +125,10 @@ func (db *DBManager) GetFilteredData(s *SearchTransaction) ([]*Transaction, erro
 	if isFirst {
 		return nil, errors.New("QUERY_PARAMS_IS_EMPTY")
 	}
-	
-	db.db.Raw(query, sql.Named("transaction_id", s.TransactionId), sql.Named("status", s.Status), 
-		sql.Named("terminal_id", s.TerminalId), sql.Named("payment_type", s.PaymentType), 
-		sql.Named("date_post_from", s.DatePostFrom), sql.Named("date_post_to", s.DatePostTo), 
+
+	db.db.Raw(query, sql.Named("transaction_id", s.TransactionId), sql.Named("status", s.Status),
+		sql.Named("terminal_id", s.TerminalId), sql.Named("payment_type", s.PaymentType),
+		sql.Named("date_post_from", s.DatePostFrom), sql.Named("date_post_to", s.DatePostTo),
 		sql.Named("payment_narrative", "%"+s.PaymentNarrative+"%")).Find(&transactions)
 	return transactions, nil
 }

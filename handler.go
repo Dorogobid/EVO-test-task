@@ -4,17 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
-	_ "github.com/Dorogobid/EVO-test-task/docs"
 	"github.com/gocarina/gocsv"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"github.com/spf13/viper"
-	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
-type ServerInterface interface {
-	ConfigureServer()
-	StartServer()
+type HandlerInterface interface {
 	UploadCSV(c echo.Context) error
 	SearchQueryToJSON(c echo.Context) error
 	SearchJSONToJSON(c echo.Context) error
@@ -22,30 +16,8 @@ type ServerInterface interface {
 	SearchJSONToCSV(c echo.Context) error
 }
 
-type Server struct {
+type Handler struct {
 	db DBManagerInterface
-	e  *echo.Echo
-}
-
-func (s *Server) ConfigureServer() {
-	s.e.Use(middleware.Recover())
-	s.e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "method=${method}, uri=${uri}, status=${status}\n"}))
-	s.e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
-
-	s.e.POST("/upload", s.UploadCSV)
-
-	s.e.GET("/search", s.SearchQueryToJSON)
-	s.e.POST("/search", s.SearchJSONToJSON)
-
-	s.e.GET("/search-csv", s.SearchQueryToCSV)
-	s.e.POST("/search-csv", s.SearchJSONToCSV)
-
-	s.e.GET("/swagger/*", echoSwagger.WrapHandler)
-}
-
-func (s *Server) StartServer() {
-	s.e.Logger.Fatal(s.e.Start(viper.GetString("port")))
 }
 
 // uploadCSV ... Upload CSV file
@@ -58,7 +30,7 @@ func (s *Server) StartServer() {
 // @Success 200 {object} SucsessResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /upload [post]
-func (s *Server) UploadCSV(c echo.Context) error {
+func (h *Handler) UploadCSV(c echo.Context) error {
 	file, err := c.FormFile("file")
 	if err != nil {
 		return err
@@ -76,7 +48,7 @@ func (s *Server) UploadCSV(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, errResp)
 	}
 
-	if err := s.db.LoadCSVToDB(transactions); err != nil {
+	if err := h.db.LoadCSVToDB(transactions); err != nil {
 		errResp := ErrorResponse{Message: err.Error()}
 		return c.JSON(http.StatusInternalServerError, errResp)
 	}
@@ -100,16 +72,16 @@ func (s *Server) UploadCSV(c echo.Context) error {
 // @Success 200 {object} []Transaction
 // @Failure 400 {object} ErrorResponse
 // @Router /search [get]
-func (s *Server) SearchQueryToJSON(c echo.Context) error {
+func (h *Handler) SearchQueryToJSON(c echo.Context) error {
 	search := new(SearchTransaction)
 
-	err := s.bindData(c, search)
+	err := h.bindData(c, search)
 	if err != nil {
 		errResp := ErrorResponse{Message: "Bad request"}
 		return c.JSON(http.StatusBadRequest, errResp)
 	}
 
-	transactions, err := s.db.GetFilteredData(search)
+	transactions, err := h.db.GetFilteredData(search)
 	if err != nil {
 		errResp := ErrorResponse{Message: err.Error()}
 		return c.JSON(http.StatusBadRequest, errResp)
@@ -128,7 +100,7 @@ func (s *Server) SearchQueryToJSON(c echo.Context) error {
 // @Success 200 {object} []Transaction
 // @Failure 400 {object} ErrorResponse
 // @Router /search [post]
-func (s *Server) SearchJSONToJSON(c echo.Context) error {
+func (h *Handler) SearchJSONToJSON(c echo.Context) error {
 	search := new(SearchTransaction)
 
 	err := c.Bind(&search)
@@ -137,7 +109,7 @@ func (s *Server) SearchJSONToJSON(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, errResp)
 	}
 
-	transactions, err := s.db.GetFilteredData(search)
+	transactions, err := h.db.GetFilteredData(search)
 	if err != nil {
 		errResp := ErrorResponse{Message: err.Error()}
 		return c.JSON(http.StatusBadRequest, errResp)
@@ -161,14 +133,14 @@ func (s *Server) SearchJSONToJSON(c echo.Context) error {
 // @Success 200 {file} file "CSV file"
 // @Failure 400 {object} ErrorResponse
 // @Router /search-csv [get]
-func (s *Server) SearchQueryToCSV(c echo.Context) error {
+func (h *Handler) SearchQueryToCSV(c echo.Context) error {
 	search := new(SearchTransaction)
-	err := s.bindData(c, search)
+	err := h.bindData(c, search)
 	if err != nil {
 		errResp := ErrorResponse{Message: "Bad request"}
 		return c.JSON(http.StatusBadRequest, errResp)
 	}
-	transactions, err := s.db.GetFilteredData(search)
+	transactions, err := h.db.GetFilteredData(search)
 	if err != nil {
 		errResp := ErrorResponse{Message: err.Error()}
 		return c.JSON(http.StatusBadRequest, errResp)
@@ -193,14 +165,14 @@ func (s *Server) SearchQueryToCSV(c echo.Context) error {
 // @Success 200 {file} file "CSV file"
 // @Failure 400 {object} ErrorResponse
 // @Router /search-csv [post]
-func (s *Server) SearchJSONToCSV(c echo.Context) error {
+func (h *Handler) SearchJSONToCSV(c echo.Context) error {
 	search := new(SearchTransaction)
 	err := c.Bind(&search)
 	if err != nil {
 		errResp := ErrorResponse{Message: "Bad request"}
 		return c.JSON(http.StatusBadRequest, errResp)
 	}
-	transactions, err := s.db.GetFilteredData(search)
+	transactions, err := h.db.GetFilteredData(search)
 	if err != nil {
 		errResp := ErrorResponse{Message: err.Error()}
 		return c.JSON(http.StatusBadRequest, errResp)
@@ -215,7 +187,7 @@ func (s *Server) SearchJSONToCSV(c echo.Context) error {
 	return c.Blob(http.StatusOK, "text/csv", []byte(csvContent))
 }
 
-func (s *Server) bindData(c echo.Context, search *SearchTransaction) error {
+func (h *Handler) bindData(c echo.Context, search *SearchTransaction) error {
 	return echo.QueryParamsBinder(c).
 		Uint("transaction_id", &search.TransactionId).
 		BindWithDelimiter("terminal_id", &search.TerminalId, ",").

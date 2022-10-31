@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	_ "github.com/Dorogobid/EVO-test-task/docs"
@@ -56,7 +55,7 @@ func getConfig() *DBConfig {
 	if !isHostPresent {
 		host = viper.GetString("db.host")
 	}
-	fmt.Println(host)
+
 	return &DBConfig{
 		Host:     host,
 		Username: viper.GetString("db.username"),
